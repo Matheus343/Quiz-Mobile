@@ -1,7 +1,16 @@
-import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { createTables } from './database';
+import React, { useEffect } from 'react';
+
 
 export default function Home({ navigation }) {
+  useEffect(() => {
+    const setupDatabase = async () => {
+      await createTables();
+    };
+    setupDatabase();
+  }, []);
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>BrainBuster</Text>
@@ -26,7 +35,7 @@ export default function Home({ navigation }) {
 
       <TouchableOpacity 
         style={styles.smallButton} 
-        onPress={() => navigation.navigate('App')}>
+        onPress={() => navigation.navigate('Lobby')}>
         <Text style={styles.buttonText}>Início</Text>
       </TouchableOpacity>
     </View>
@@ -44,12 +53,12 @@ const styles = StyleSheet.create({
     color: '#DEAB04',
     fontSize: 36,
     fontFamily: 'Jura_400Regular',
-    marginBottom: 40,
+    flex: 0.6,
   },
   button: {
     backgroundColor: '#DEAB04',
-    paddingVertical: 10,
-    paddingHorizontal: 50,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 20,
     marginVertical: 10,
   },
@@ -60,8 +69,8 @@ const styles = StyleSheet.create({
   },
   smallButton: {
     backgroundColor: '#DEAB04', 
-    paddingVertical: 10,
-    paddingHorizontal: 30,
+    paddingVertical: 3,
+    paddingHorizontal: 20,
     borderRadius: 20,
     marginTop: 20,
   },

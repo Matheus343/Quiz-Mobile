@@ -21,7 +21,7 @@ export default function TelaCriadores({ navigation }) {
 
       <TouchableOpacity 
         style={styles.button} 
-        onPress={() => navigation.navigate('App')}>
+        onPress={() => navigation.navigate('Lobby')}>
         <Text style={styles.buttonText}>Início</Text>
       </TouchableOpacity>
     </View>

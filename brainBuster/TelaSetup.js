@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Picker, StyleSheet, Alert } from 'react-native';
-import { getTemas, countPerguntasByTema } from './database';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { getTemas } from './database';
 
 export default function TelaSetup({ navigation }) {
   const [temaSelecionado, setTemaSelecionado] = useState(null);
@@ -8,27 +8,24 @@ export default function TelaSetup({ navigation }) {
   const [quantidadePerguntas, setQuantidadePerguntas] = useState(3);
 
   useEffect(() => {
-    getTemas((result) => {
-      setTemas(result);
-    });
+    carregarTemas();
   }, []);
+
+  const carregarTemas = async () => {
+    try {
+      const temasObtidos = await getTemas();
+      setTemas(temasObtidos);
+    } catch (error) {
+      console.error("Erro ao carregar temas:", error);
+    }
+  };
 
   const iniciarJogo = () => {
     if (!temaSelecionado) {
       Alert.alert('Erro', 'Por favor, selecione um tema.');
       return;
     }
-
-    countPerguntasByTema(temaSelecionado, (count) => {
-      if (count < quantidadePerguntas) {
-        Alert.alert(
-          'Erro',
-          `O tema selecionado tem apenas ${count} perguntas. Escolha outro tema ou diminua o número de perguntas.`
-        );
-      } else {
-        navigation.navigate('TelaJogo', { temaId: temaSelecionado, quantidade: quantidadePerguntas });
-      }
-    });
+    navigation.navigate('TelaJogo', { temaId: temaSelecionado, quantidade: quantidadePerguntas });
   };
 
   return (
@@ -36,30 +33,35 @@ export default function TelaSetup({ navigation }) {
       <Text style={styles.title}>BrainBuster</Text>
 
       <Text style={styles.label}>Selecione seu tema</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={temaSelecionado}
-          style={styles.picker}
-          onValueChange={(itemValue) => setTemaSelecionado(itemValue)}
-        >
-          <Picker.Item label="Selecione um tema" value={null} />
-          {temas.map((tema) => (
-            <Picker.Item key={tema.id} label={tema.nome} value={tema.id} />
-          ))}
-        </Picker>
+      <View style={styles.temasContainer}>
+        {temas.map((tema) => (
+          <TouchableOpacity
+            key={tema.id}
+            style={[
+              styles.temaButton,
+              temaSelecionado === tema.id && styles.temaButtonSelecionado,
+            ]}
+            onPress={() => setTemaSelecionado(tema.id)}
+          >
+            <Text style={styles.temaButtonText}>{tema.nome}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <Text style={styles.label}>Selecione a quantidade de perguntas</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={quantidadePerguntas}
-          style={styles.picker}
-          onValueChange={(itemValue) => setQuantidadePerguntas(itemValue)}
-        >
-          <Picker.Item label="3 perguntas" value={3} />
-          <Picker.Item label="5 perguntas" value={5} />
-          <Picker.Item label="7 perguntas" value={7} />
-        </Picker>
+      <View style={styles.quantidadeContainer}>
+        {[3, 5, 7].map((quantidade) => (
+          <TouchableOpacity
+            key={quantidade}
+            style={[
+              styles.quantidadeButton,
+              quantidadePerguntas === quantidade && styles.quantidadeButtonSelecionado,
+            ]}
+            onPress={() => setQuantidadePerguntas(quantidade)}
+          >
+            <Text style={styles.quantidadeButtonText}>{quantidade} perguntas</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <TouchableOpacity 
@@ -90,16 +92,45 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontFamily: 'Jura_400Regular',
   },
-  pickerContainer: {
-    backgroundColor: '#DEAB04',
-    borderRadius: 20,
-    width: '80%',
+  temasContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     marginBottom: 20,
   },
-  picker: {
-    height: 50,
-    width: '100%',
+  temaButton: {
+    backgroundColor: '#DEAB04',
+    padding: 10,
+    borderRadius: 20,
+    marginHorizontal: 5,
+    marginVertical: 5,
+  },
+  temaButtonSelecionado: {
+    backgroundColor: '#FFFF',
+  },
+  temaButtonText: {
     color: '#5C2F7A',
+    fontSize: 16,
+    fontFamily: 'Jura_400Regular',
+  },
+  quantidadeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  quantidadeButton: {
+    backgroundColor: '#DEAB04',
+    padding: 10,
+    borderRadius: 20,
+    marginHorizontal: 10,
+  },
+  quantidadeButtonSelecionado: {
+    backgroundColor: '#FFFF',
+  },
+  quantidadeButtonText: {
+    color: '#5C2F7A',
+    fontSize: 16,
+    fontFamily: 'Jura_400Regular',
   },
   button: {
     backgroundColor: '#DEAB04',
